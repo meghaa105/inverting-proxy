@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the License for the specific language governing permiissions and
 limitations under the License.
 */
 
@@ -18,6 +18,7 @@ package websockets
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,8 +32,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"text/template"
-
-	"context"
 	"github.com/google/inverting-proxy/agent/metrics"
 )
 
@@ -488,6 +487,7 @@ func createShimChannel(ctx context.Context, host, shimPath string, rewriteHost b
 			statusCode := http.StatusBadRequest
 			http.Error(w, fmt.Sprintf("attempt to read data from a closed session: %q", msg.ID), statusCode)
 			metricHandler.WriteResponseCodeMetric(statusCode)
+			connections.Delete(msg.ID)
 			return
 		} else if serverMsgs == nil {
 			statusCode := http.StatusRequestTimeout
